@@ -1,3 +1,4 @@
+require 'pry'
 vertex_array = []
 
 File.open('kargerMinCut.txt').each_line do |line|
@@ -15,9 +16,10 @@ class RandomMinCut
   end
 
   def min_cut
-    # until vertex_array.count == 2
+    until vertex_array.count == 2
       merge_vertices(*random_vertices)
-    # end
+    end
+    p vertex_array[0][1].count
   end
 
   private
@@ -30,27 +32,33 @@ class RandomMinCut
   end
 
   def merge_vertices(vertex_1, vertex_2)
-    replace_index_vertex(vertex_1, vertex_2)
-    # merge_vertex_groups(vertex_1, vertex_2)
-    # replace_vertex_in_subarray(vertex_1, vertex_2, subarray)
-    # remove_self_loops(vertex_1, new_subarray)
+    merge_and_replace_index_vertex(vertex_1, vertex_2)
+    replace_vertex_in_subarrays(vertex_1, vertex_2)
   end
 
-  def replace_index_vertex(vertex_1, vertex_2)
+  def merge_and_replace_index_vertex(vertex_1, vertex_2)
+    group_1 = vertex_array.assoc(vertex_1)
+    vertex_array.assoc(vertex_2)[1] += group_1[1] rescue p "trying to access #{vertex_2}"
+    vertex_array.delete(group_1)
   end
 
-  def merge_vertex_groups(vertex_1, vertex_2)
-
+  def replace_vertex_in_subarrays(vertex_1, vertex_2)
+    vertex_array.each { |group| replace_vertex_in_subarray(vertex_1, vertex_2, group) }
   end
 
-  def replace_vertex_in_subarray(vertex_1, vertex_2, subarray)
-
+  def replace_vertex_in_subarray(old_value, new_value, group)
+    subarray = group[1]
+    subarray.collect! do |vertex|
+      if vertex == old_value
+        new_value
+      else
+        vertex
+      end
+    end
+    subarray.reject! {|vertex| vertex == group[0]}
   end
 
-  def remove_self_loops(vertex_1, new_subarray)
-
-  end
 end
 
-p RandomMinCut.new(vertex_array).min_cut
+RandomMinCut.new(vertex_array).min_cut
 
